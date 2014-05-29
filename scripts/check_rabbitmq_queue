@@ -20,13 +20,9 @@ $VERSION = '1.0';
 use File::Basename;
 $PROGNAME = basename($0);
 
-################
-#
+#########################################
 # Create a new Nagios::Plugin object.
-#
-# 
-#
-###############
+#########################################
 my $plugin = Nagios::Plugin->new(
     usage => "Usage: %s [options] -H hostname",
     license => "",
@@ -93,19 +89,15 @@ $plugin->add_arg(spec => 'proxy|proxy!',
 $plugin->getopts;
 
 ####################################################################################
-#
 # A hash is a special kind of array - an associative array, or paired group of elements. Perl hash names are prefixed with a percent sign (%), and consist of pairs of elements - a key and a data value.
 #
 #     Hash Name     key        value
 #     %critical  = ( "messages",         "200",
-#                  "ack_less_than",    ".10",
-#                  "ack_greater_than", "20"   );
+#                  "ack_details",    "39.99:600");
 #
 #     This hash consists of a check name for the key, and their checked value as the data element. You refer to the individual elements of the hash with a $ sign
 #
-#         $pages{'fred'}
-#
-#
+#         $critical{'ack_details'}
 ######################################################################################
 #
 # perform sanity checking on command line options
@@ -218,7 +210,6 @@ sub request {
         }
     }
     my $bodyref = decode_json $res->content;
-    printf("$res->content\n\n");
     return($res->code, $bodyref);
 }
 
