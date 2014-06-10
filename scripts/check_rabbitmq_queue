@@ -88,39 +88,25 @@ $plugin->add_arg(spec => 'proxy|proxy!',
 # Parse arguments and process standard ones (e.g. usage, help, version)
 $plugin->getopts;
 
-####################################################################################
-# A hash is a special kind of array - an associative array, or paired group of elements. Perl hash names are prefixed with a percent sign (%), and consist of pairs of elements - a key and a data value.
-#
-#     Hash Name     key        value
-#     %critical  = ( "messages",         "200",
-#                  "ack_details",    "39.99:600");
-#
-#     This hash consists of a check name for the key, and their checked value as the data element. You refer to the individual elements of the hash with a $ sign
-#
-#         $critical{'ack_details'}
-######################################################################################
-#
 # perform sanity checking on command line options
 my %warning;
 if (defined $plugin->opts->warning) {
     # warning array, split each variable in the array by parsing the comma in the command line options
     my @warning = split(',', $plugin->opts->warning);
-    $plugin->nagios_die("You should specify 1 to 3 ranges for --warning argument, 1. Messages 2. Ack per second lower bounds  3.Acks per second upper bound") unless $#warning < 3;
+    $plugin->nagios_die("You should specify 1 for --warning argument") unless $#warning < 1;
 
 #
 # Modify options for Total Messages, and Acks per second range
 #
     $warning{'messages'} = shift @warning;
-    $warning{'ack_details'} = shift @warning;
 }
 
 my %critical;
 if (defined $plugin->opts->critical) {
     my @critical = split(',', $plugin->opts->critical);
-    $plugin->nagios_die("You should specify specify 1 to 3 ranges for --critical argument, 1. Messages 2. Ack per second lower bounds  3.Acks per second upper bound ") unless $#critical < 3;
+    $plugin->nagios_die("You should specify specify 1 for --critical argument") unless $#critical < 1;
 
     $critical{'messages'} = shift @critical;
-    $critical{'ack_details'} = shift @critical;
 }
 
 
@@ -161,26 +147,6 @@ for my $metric (@metrics) {
     my $value = 0;
     $value = $result->{$metric} if defined $result->{$metric};
 
-    my $code = $plugin->check_threshold(check => $value, warning => $warning, critical=> $critical);
-    $plugin->add_message($code, sprintf("$metric ".$STATUS_TEXT{$code}." (%d)", $value)) ;
-    $plugin->add_perfdata(label=>$metric, value => $value, warning=>$warning, critical=> $critical);
-}
-
-my @stats = ("ack_details");
-for my $metric (@stats) {
-    
-    my $warning = undef;
-    $warning = $warning{$metric} if (defined $warning{$metric} and $warning{$metric} ne -1);
-    
-    my $critical = undef;
-    $critical = $critical{$metric} if (defined $critical{$metric} and $critical{$metric} ne -1);
-
-    my $value = $result->{message_stats}{$metric}{rate};
-    $value = 0 unless defined $value;
-
-    
-
-    
     my $code = $plugin->check_threshold(check => $value, warning => $warning, critical=> $critical);
     $plugin->add_message($code, sprintf("$metric ".$STATUS_TEXT{$code}." (%d)", $value)) ;
     $plugin->add_perfdata(label=>$metric, value => $value, warning=>$warning, critical=> $critical);
